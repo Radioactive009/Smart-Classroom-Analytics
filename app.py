@@ -69,6 +69,10 @@ if uploaded_file:
                 transcript
             )
 
+            keywords = extract_keywords(
+                transcript
+            )
+
             pause_count, pause_duration = (
                 analyze_pauses(file_path)
             )
@@ -113,6 +117,13 @@ if uploaded_file:
         st.json(
             fillers
         )
+
+        st.subheader(
+            "Keywords"
+        )
+
+        for keyword in keywords:
+            st.success(keyword)
 
         st.subheader(
             "Transcript"

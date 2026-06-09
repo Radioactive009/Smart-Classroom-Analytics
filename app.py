@@ -20,6 +20,10 @@ from analyzer.keywords import (
     extract_keywords
 )
 
+from analyzer.summarizer import (
+    generate_summary
+)
+
 # ------------------------------------
 # Page Configuration
 # ------------------------------------
@@ -70,9 +74,17 @@ if uploaded_file:
 
         with st.spinner("Analyzing Audio..."):
 
+            # --------------------------
+            # Speech-to-Text
+            # --------------------------
+
             transcript = transcribe_audio(
                 file_path
             )
+
+            # --------------------------
+            # Audio Metrics
+            # --------------------------
 
             duration_seconds = round(
                 librosa.get_duration(
@@ -98,6 +110,16 @@ if uploaded_file:
                 transcript
             )
 
+            pause_count, pause_duration = (
+                analyze_pauses(
+                    file_path
+                )
+            )
+
+            # --------------------------
+            # NLP Features
+            # --------------------------
+
             keywords = extract_keywords(
                 transcript
             )
@@ -106,19 +128,17 @@ if uploaded_file:
                 transcript
             )
 
-            pause_count, pause_duration = (
-                analyze_pauses(
-                    file_path
-                )
+            summary = generate_summary(
+                transcript
             )
 
         st.success(
             "Analysis Complete!"
         )
 
-        # ------------------------------------
-        # Main Metrics Row
-        # ------------------------------------
+        # ==================================
+        # MAIN METRICS
+        # ==================================
 
         col1, col2, col3, col4, col5 = st.columns(5)
 
@@ -147,9 +167,9 @@ if uploaded_file:
             duration_seconds
         )
 
-        # ------------------------------------
-        # Sentiment Section
-        # ------------------------------------
+        # ==================================
+        # SENTIMENT
+        # ==================================
 
         st.subheader("😊 Sentiment")
 
@@ -165,9 +185,19 @@ if uploaded_file:
             sentiment["score"]
         )
 
-        # ------------------------------------
-        # Keywords
-        # ------------------------------------
+        # ==================================
+        # AI SUMMARY
+        # ==================================
+
+        st.subheader("📄 AI Summary")
+
+        st.info(
+            summary
+        )
+
+        # ==================================
+        # KEYWORDS
+        # ==================================
 
         st.subheader("🔑 Keywords")
 
@@ -184,9 +214,9 @@ if uploaded_file:
                     keyword.title()
                 )
 
-        # ------------------------------------
-        # Pause Analytics
-        # ------------------------------------
+        # ==================================
+        # PAUSE ANALYTICS
+        # ==================================
 
         st.subheader("⏸ Pause Analytics")
 
@@ -194,9 +224,9 @@ if uploaded_file:
             f"Detected {pause_count} pauses with a total duration of {pause_duration} seconds."
         )
 
-        # ------------------------------------
-        # Filler Words
-        # ------------------------------------
+        # ==================================
+        # FILLER WORDS
+        # ==================================
 
         st.subheader("🗣 Filler Words")
 
@@ -204,9 +234,9 @@ if uploaded_file:
             fillers
         )
 
-        # ------------------------------------
-        # Transcript
-        # ------------------------------------
+        # ==================================
+        # TRANSCRIPT
+        # ==================================
 
         st.subheader("📝 Transcript")
 

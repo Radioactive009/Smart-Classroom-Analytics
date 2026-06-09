@@ -12,6 +12,8 @@ from analyzer.metrics import (
     analyze_pauses
 )
 
+from analyzer.keywords import extract_keywords
+
 st.set_page_config(
     page_title="Smart Classroom Speech Analytics",
     layout="wide"

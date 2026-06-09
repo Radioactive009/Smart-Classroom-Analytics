@@ -24,37 +24,50 @@ from analyzer.summarizer import (
     generate_summary
 )
 
-# ------------------------------------
-# Page Configuration
-# ------------------------------------
+# ==================================
+# PAGE CONFIG
+# ==================================
 
 st.set_page_config(
     page_title="Smart Classroom Speech Analytics",
+    page_icon="🎙",
     layout="wide"
 )
 
-# ------------------------------------
-# Create Upload Folder
-# ------------------------------------
+# ==================================
+# FOLDER SETUP
+# ==================================
 
 os.makedirs("uploads", exist_ok=True)
 
-# ------------------------------------
-# Title
-# ------------------------------------
+# ==================================
+# HEADER
+# ==================================
 
 st.title("🎙 Smart Classroom Speech Analytics")
 
 st.markdown(
-    "Upload classroom audio and receive AI-powered speech analytics."
+    """
+    Upload classroom recordings and receive AI-powered insights including:
+    
+    - Speech-to-Text
+    - Speaking Rate Analysis
+    - Pause Detection
+    - Filler Word Analysis
+    - Sentiment Analysis
+    - Keyword Extraction
+    - AI Generated Summary
+    """
 )
 
-# ------------------------------------
-# File Upload
-# ------------------------------------
+st.divider()
+
+# ==================================
+# FILE UPLOAD
+# ==================================
 
 uploaded_file = st.file_uploader(
-    "Upload Audio",
+    "Upload Audio File",
     type=["wav", "mp3", "m4a"]
 )
 
@@ -70,21 +83,21 @@ if uploaded_file:
 
     st.audio(file_path)
 
-    if st.button("Transcribe & Analyze"):
+    if st.button("🚀 Analyze Audio"):
 
-        with st.spinner("Analyzing Audio..."):
+        with st.spinner("Running AI Analysis..."):
 
-            # --------------------------
-            # Speech-to-Text
-            # --------------------------
+            # ---------------------------
+            # Speech Recognition
+            # ---------------------------
 
             transcript = transcribe_audio(
                 file_path
             )
 
-            # --------------------------
+            # ---------------------------
             # Audio Metrics
-            # --------------------------
+            # ---------------------------
 
             duration_seconds = round(
                 librosa.get_duration(
@@ -116,9 +129,9 @@ if uploaded_file:
                 )
             )
 
-            # --------------------------
+            # ---------------------------
             # NLP Features
-            # --------------------------
+            # ---------------------------
 
             keywords = extract_keywords(
                 transcript
@@ -133,12 +146,14 @@ if uploaded_file:
             )
 
         st.success(
-            "Analysis Complete!"
+            "✅ Analysis Complete"
         )
 
         # ==================================
         # MAIN METRICS
         # ==================================
+
+        st.subheader("📊 Speech Metrics")
 
         col1, col2, col3, col4, col5 = st.columns(5)
 
@@ -163,20 +178,30 @@ if uploaded_file:
         )
 
         col5.metric(
-            "Duration (sec)",
-            duration_seconds
+            "Duration",
+            f"{duration_seconds}s"
         )
+
+        st.divider()
+
+        # ==================================
+        # SUMMARY
+        # ==================================
+
+        st.subheader("📄 AI Summary")
+
+        st.info(summary)
 
         # ==================================
         # SENTIMENT
         # ==================================
 
-        st.subheader("😊 Sentiment")
+        st.subheader("😊 Sentiment Analysis")
 
         sent1, sent2 = st.columns(2)
 
         sent1.metric(
-            "Label",
+            "Sentiment",
             sentiment["label"]
         )
 
@@ -185,15 +210,7 @@ if uploaded_file:
             sentiment["score"]
         )
 
-        # ==================================
-        # AI SUMMARY
-        # ==================================
-
-        st.subheader("📄 AI Summary")
-
-        st.info(
-            summary
-        )
+        st.divider()
 
         # ==================================
         # KEYWORDS
@@ -210,9 +227,11 @@ if uploaded_file:
             for i, keyword in enumerate(
                 keywords[:5]
             ):
-                keyword_cols[i].info(
+                keyword_cols[i].success(
                     keyword.title()
                 )
+
+        st.divider()
 
         # ==================================
         # PAUSE ANALYTICS
@@ -221,8 +240,14 @@ if uploaded_file:
         st.subheader("⏸ Pause Analytics")
 
         st.info(
-            f"Detected {pause_count} pauses with a total duration of {pause_duration} seconds."
+            f"""
+            Total Pauses Detected: {pause_count}
+            
+            Total Pause Duration: {pause_duration} seconds
+            """
         )
+
+        st.divider()
 
         # ==================================
         # FILLER WORDS
@@ -230,9 +255,19 @@ if uploaded_file:
 
         st.subheader("🗣 Filler Words")
 
-        st.json(
-            fillers
+        filler_cols = st.columns(
+            len(fillers)
         )
+
+        for idx, (word, count) in enumerate(
+            fillers.items()
+        ):
+            filler_cols[idx].metric(
+                word,
+                count
+            )
+
+        st.divider()
 
         # ==================================
         # TRANSCRIPT
@@ -240,6 +275,10 @@ if uploaded_file:
 
         st.subheader("📝 Transcript")
 
-        st.write(
-            transcript
-        )
+        with st.expander(
+            "View Full Transcript",
+            expanded=True
+        ):
+            st.write(
+                transcript
+            )

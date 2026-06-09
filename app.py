@@ -12,7 +12,13 @@ from analyzer.metrics import (
     analyze_pauses
 )
 
-from analyzer.keywords import extract_keywords
+from analyzer.sentiment import (
+    analyze_sentiment
+)
+
+from analyzer.keywords import (
+    extract_keywords
+)
 
 # ------------------------------------
 # Page Configuration
@@ -34,6 +40,10 @@ os.makedirs("uploads", exist_ok=True)
 # ------------------------------------
 
 st.title("🎙 Smart Classroom Speech Analytics")
+
+st.markdown(
+    "Upload classroom audio and receive AI-powered speech analytics."
+)
 
 # ------------------------------------
 # File Upload
@@ -64,8 +74,11 @@ if uploaded_file:
                 file_path
             )
 
-            duration_seconds = librosa.get_duration(
-                path=file_path
+            duration_seconds = round(
+                librosa.get_duration(
+                    path=file_path
+                ),
+                2
             )
 
             word_count = get_word_count(
@@ -89,20 +102,28 @@ if uploaded_file:
                 transcript
             )
 
-            pause_count, pause_duration = (
-                analyze_pauses(file_path)
+            sentiment = analyze_sentiment(
+                transcript
             )
 
-        st.success("Analysis Complete!")
+            pause_count, pause_duration = (
+                analyze_pauses(
+                    file_path
+                )
+            )
+
+        st.success(
+            "Analysis Complete!"
+        )
 
         # ------------------------------------
-        # Main Metrics
+        # Main Metrics Row
         # ------------------------------------
 
-        col1, col2, col3 = st.columns(3)
+        col1, col2, col3, col4, col5 = st.columns(5)
 
         col1.metric(
-            "Word Count",
+            "Words",
             word_count
         )
 
@@ -116,24 +137,36 @@ if uploaded_file:
             speed
         )
 
-        # ------------------------------------
-        # Pause Metrics
-        # ------------------------------------
-
-        col4, col5 = st.columns(2)
-
         col4.metric(
-            "Pause Count",
+            "Pauses",
             pause_count
         )
 
         col5.metric(
-            "Pause Duration (sec)",
-            pause_duration
+            "Duration (sec)",
+            duration_seconds
         )
 
         # ------------------------------------
-        # Keywords Section
+        # Sentiment Section
+        # ------------------------------------
+
+        st.subheader("😊 Sentiment")
+
+        sent1, sent2 = st.columns(2)
+
+        sent1.metric(
+            "Label",
+            sentiment["label"]
+        )
+
+        sent2.metric(
+            "Confidence %",
+            sentiment["score"]
+        )
+
+        # ------------------------------------
+        # Keywords
         # ------------------------------------
 
         st.subheader("🔑 Keywords")
@@ -148,8 +181,18 @@ if uploaded_file:
                 keywords[:5]
             ):
                 keyword_cols[i].info(
-                    keyword
+                    keyword.title()
                 )
+
+        # ------------------------------------
+        # Pause Analytics
+        # ------------------------------------
+
+        st.subheader("⏸ Pause Analytics")
+
+        st.info(
+            f"Detected {pause_count} pauses with a total duration of {pause_duration} seconds."
+        )
 
         # ------------------------------------
         # Filler Words

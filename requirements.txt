@@ -1,0 +1,11 @@
+streamlit
+openai-whisper
+transformers
+torch
+keybert
+sentence-transformers
+librosa
+numpy
+pandas
+soundfile
+ffmpeg-python

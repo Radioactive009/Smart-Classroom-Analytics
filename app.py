@@ -14,14 +14,30 @@ from analyzer.metrics import (
 
 from analyzer.keywords import extract_keywords
 
+# ------------------------------------
+# Page Configuration
+# ------------------------------------
+
 st.set_page_config(
     page_title="Smart Classroom Speech Analytics",
     layout="wide"
 )
 
+# ------------------------------------
+# Create Upload Folder
+# ------------------------------------
+
 os.makedirs("uploads", exist_ok=True)
 
+# ------------------------------------
+# Title
+# ------------------------------------
+
 st.title("🎙 Smart Classroom Speech Analytics")
+
+# ------------------------------------
+# File Upload
+# ------------------------------------
 
 uploaded_file = st.file_uploader(
     "Upload Audio",
@@ -77,9 +93,11 @@ if uploaded_file:
                 analyze_pauses(file_path)
             )
 
-        st.success(
-            "Analysis Complete!"
-        )
+        st.success("Analysis Complete!")
+
+        # ------------------------------------
+        # Main Metrics
+        # ------------------------------------
 
         col1, col2, col3 = st.columns(3)
 
@@ -98,6 +116,10 @@ if uploaded_file:
             speed
         )
 
+        # ------------------------------------
+        # Pause Metrics
+        # ------------------------------------
+
         col4, col5 = st.columns(2)
 
         col4.metric(
@@ -110,24 +132,40 @@ if uploaded_file:
             pause_duration
         )
 
-        st.subheader(
-            "Filler Words"
-        )
+        # ------------------------------------
+        # Keywords Section
+        # ------------------------------------
+
+        st.subheader("🔑 Keywords")
+
+        if keywords:
+
+            keyword_cols = st.columns(
+                min(len(keywords), 5)
+            )
+
+            for i, keyword in enumerate(
+                keywords[:5]
+            ):
+                keyword_cols[i].info(
+                    keyword
+                )
+
+        # ------------------------------------
+        # Filler Words
+        # ------------------------------------
+
+        st.subheader("🗣 Filler Words")
 
         st.json(
             fillers
         )
 
-        st.subheader(
-            "Keywords"
-        )
+        # ------------------------------------
+        # Transcript
+        # ------------------------------------
 
-        for keyword in keywords:
-            st.success(keyword)
-
-        st.subheader(
-            "Transcript"
-        )
+        st.subheader("📝 Transcript")
 
         st.write(
             transcript

@@ -3,16 +3,14 @@ import os
 import librosa
 
 from analyzer.transcriber import transcribe_audio
+
 from analyzer.metrics import (
     get_word_count,
     calculate_wpm,
     get_speed_category,
-    detect_fillers
+    detect_fillers,
+    analyze_pauses
 )
-
-# -----------------------------------
-# Page Config
-# -----------------------------------
 
 st.set_page_config(
     page_title="Smart Classroom Speech Analytics",
@@ -44,7 +42,9 @@ if uploaded_file:
 
         with st.spinner("Analyzing Audio..."):
 
-            transcript = transcribe_audio(file_path)
+            transcript = transcribe_audio(
+                file_path
+            )
 
             duration_seconds = librosa.get_duration(
                 path=file_path
@@ -67,7 +67,13 @@ if uploaded_file:
                 transcript
             )
 
-        st.success("Analysis Complete!")
+            pause_count, pause_duration = (
+                analyze_pauses(file_path)
+            )
+
+        st.success(
+            "Analysis Complete!"
+        )
 
         col1, col2, col3 = st.columns(3)
 
@@ -86,10 +92,30 @@ if uploaded_file:
             speed
         )
 
-        st.subheader("Filler Words")
+        col4, col5 = st.columns(2)
 
-        st.json(fillers)
+        col4.metric(
+            "Pause Count",
+            pause_count
+        )
 
-        st.subheader("Transcript")
+        col5.metric(
+            "Pause Duration (sec)",
+            pause_duration
+        )
 
-        st.write(transcript)
+        st.subheader(
+            "Filler Words"
+        )
+
+        st.json(
+            fillers
+        )
+
+        st.subheader(
+            "Transcript"
+        )
+
+        st.write(
+            transcript
+        )
